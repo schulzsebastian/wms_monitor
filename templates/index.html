@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>WMS Monitor</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <script type="text/javascript" src="{{ url_for('static', filename='node_modules/vue/dist/vue.js') }}"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div v-text="hello">
+      </div>
+    </div>
+  </body>
+  <script>
+  let vm = new Vue({
+    el: '#app',
+    data: {
+      hello: 'Hello!'
+    }
+  })
+  </script>
+</html>
