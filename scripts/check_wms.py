@@ -27,29 +27,28 @@ class Geoportal(object):
             "service": "wms",
             "request": "getcapabilities"
         }
+        error = ""
         try:
             r = requests.get(url, params=params, timeout=20)
             if r.status_code == 200:
                 r.encoding = "utf-8"
                 if "WMS_Capabilities" in r.text:
-                    return True
+                    return ""
                 else:
-                    if self.log:
-                        print("[{}] Invalid content ({})".format(strftime("%c"), url))
+                    error = "[{}] Invalid content ({})".format(strftime("%c"), url)
             else:
-                if self.log:
-                    print("[{}] Invalid status code ({})".format(strftime("%c"), url))
-        except requests.exceptions.ConnectionError:
-            if self.log:
-                print("[{}] Time out ({})".format(strftime("%c"), url))
-            return False
-        return False
+                error = "[{}] Invalid status code ({})".format(strftime("%c"), url)
+        except requests.exceptions.ReadTimeout:
+            error = "[{}] Time out ({})".format(strftime("%c"), url)
+        if self.log:
+            print(error)
+        return error
 
     def check_urls(self):
         return not bool(self.invalid_wms_list())
 
     def invalid_wms_list(self):
-        return [u for u in self.url_list() if not self.check_url(u["url"])]
+        return [u for u in self.url_list() if self.check_url(u["url"])]
 
 if __name__ == "__main__":
     wms = Geoportal(log=True)
