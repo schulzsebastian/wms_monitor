@@ -1,44 +1,57 @@
 # !usr/bin/python
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
-from time import sleep
+from time import sleep, strftime
 import requests
 
 
 class Geoportal(object):
-    def __init__(self):
-        self.url = 'http://www.geoportal.gov.pl/uslugi/usluga-przegladania-wms'
+    def __init__(self, log=False):
+        self.log = log
+        self.url = "http://www.geoportal.gov.pl/uslugi/usluga-przegladania-wms"
 
     def url_list(self):
         urls = []
-        r = requests.get('http://www.geoportal.gov.pl/uslugi/usluga-przegladania-wms')
+        r = requests.get("http://www.geoportal.gov.pl/uslugi/usluga-przegladania-wms")
         if r.status_code == 200:
-            soup = BeautifulSoup(r.text, 'html.parser')
-            for row in soup.find_all('td'):
-                urls.append(row.find_all('p')[1].string)
+            soup = BeautifulSoup(r.text, "html.parser")
+            for row in soup.find_all("td"):
+                urls.append({
+                    "name": row.find_all("p")[0].string,
+                    "url": row.find_all("p")[1].string
+                })
         return urls
 
     def check_url(self, url):
         params = {
-            'service': 'wms',
-            'request': 'getcapabilities'
+            "service": "wms",
+            "request": "getcapabilities"
         }
-        r = requests.get(url, params=params, timeout=20)
-        if r.status_code == 200:
-            r.encoding = 'utf-8'
-            if 'WMS_Capabilities' in r.text:
-                return True
+        try:
+            r = requests.get(url, params=params, timeout=20)
+            if r.status_code == 200:
+                r.encoding = "utf-8"
+                if "WMS_Capabilities" in r.text:
+                    return True
+                else:
+                    if self.log:
+                        print("[{}] Invalid content ({})".format(strftime("%c"), url))
+            else:
+                if self.log:
+                    print("[{}] Invalid status code ({})".format(strftime("%c"), url))
+        except requests.exceptions.ConnectionError:
+            if self.log:
+                print("[{}] Time out ({})".format(strftime("%c"), url))
+            return False
         return False
 
     def check_urls(self):
-        return not bool(self.invalid_urls())
+        return not bool(self.invalid_wms_list())
 
-    def invalid_urls(self):
-        return [url for url in self.url_list() if not self.check_url(url)]
+    def invalid_wms_list(self):
+        return [u for u in self.url_list() if not self.check_url(u["url"])]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    wms = Geoportal(log=True)
     while True:
-        wms = Geoportal()
-        print(wms.check_urls())
-        print(wms.invalid_urls())
-        sleep(5)
+        wms.check_urls()
