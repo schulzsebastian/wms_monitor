@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/schulzsebastian/wms_monitor/issues"
   },
-  "homepage": "https://github.com/schulzsebastian/wms_monitor#readme"
+  "homepage": "https://github.com/schulzsebastian/wms_monitor#readme",
+  "dependencies": {
+    "vue": "~2.2.1"
+  }
 }

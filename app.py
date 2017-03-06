@@ -1,10 +1,7 @@
 # !usr/bin/python
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template
+from tornado.web import RequestHandler
 
-app = Flask(__name__)
-
-
-@app.route("/")
-def index():
-    return render_template("index.html")
+class MainHandler(RequestHandler):
+    def get(self):
+        self.render("templates/index.html")

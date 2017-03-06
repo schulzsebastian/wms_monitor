@@ -12,7 +12,7 @@ class Geoportal(object):
 
     def url_list(self):
         urls = []
-        r = requests.get("http://www.geoportal.gov.pl/uslugi/usluga-przegladania-wms")
+        r = requests.get(self.url)
         if r.status_code == 200:
             soup = BeautifulSoup(r.text, "html.parser")
             for row in soup.find_all("td"):
@@ -33,15 +33,13 @@ class Geoportal(object):
             if r.status_code == 200:
                 r.encoding = "utf-8"
                 if "WMS_Capabilities" in r.text:
-                    return ""
+                    return False
                 else:
                     error = "[{}] Invalid content ({})".format(strftime("%c"), url)
             else:
                 error = "[{}] Invalid status code ({})".format(strftime("%c"), url)
         except requests.exceptions.ReadTimeout:
             error = "[{}] Time out ({})".format(strftime("%c"), url)
-        if self.log:
-            print(error)
         return error
 
     def check_urls(self):
@@ -50,7 +48,16 @@ class Geoportal(object):
     def invalid_wms_list(self):
         return [u for u in self.url_list() if self.check_url(u["url"])]
 
-if __name__ == "__main__":
-    wms = Geoportal(log=True)
-    while True:
-        wms.check_urls()
+    def enable_monitoring(self):
+        while True:
+            invalid_urls = self.invalid_wms_list()
+            if self.log:
+                if invalid_urls:
+                        print("End of checking: ERRORS")
+                        print("**********")
+                        print("Error list:")
+                        for error in invalid_urls:
+                            print(error)
+                        print("**********")
+                else:
+                    print("End of checking: OK")
