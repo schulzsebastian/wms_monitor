@@ -1,2 +1,2 @@
 # wms_monitor
-WMS monitor (Flask &amp; Tornado &amp; Vue.js)
+WMS monitor (Flask &amp; Celery &amp; Vue.js)
